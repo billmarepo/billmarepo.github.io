@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KaTeX PLaYground</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx" crossorigin="anonymous"></script>
+
+    <!-- To automatically render math in text elements, include the auto-render extension: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.css" integrity="sha384-WsHMgfkABRyG494OmuiNmkAOk8nhO1qE+Y6wns6v+EoNoTNxrWxYpl5ZYWFOLPCM" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.js" integrity="sha384-lhN3C1JSmmvbT89RGOy6nC8qFBS8X/PLsBWIqiNdD4WGNsYOWpS2Il0x4TBrK8E2" crossorigin="anonymous"></script>
+
+    <script>
+      window.WebFontConfig = {
+        custom: {
+          families: ['KaTeX_AMS', 'KaTeX_Caligraphic:n4,n7', 'KaTeX_Fraktur:n4,n7',
+            'KaTeX_Main:n4,n7,i4,i7', 'KaTeX_Math:i4,i7', 'KaTeX_Script',
+            'KaTeX_SansSerif:n4,n7,i4', 'KaTeX_Size1', 'KaTeX_Size2', 'KaTeX_Size3',
+            'KaTeX_Size4', 'KaTeX_Typewriter'],
+        },
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.js" integrity="sha256-4O4pS1SH31ZqrSO2A/2QJTVjTPqVe+jnYgOWUVr7EEc=" crossorigin="anonymous">
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital@0;1&display=swap" rel="stylesheet">
+
+    <script>
+      const LOGO = `
+      \\KaTeX\\,\\text{PL%
+\\hspace{-.36em}\\raisebox{.22em}{\\scriptsize A}\\hspace{-.15em}%
+Y\\hspace{-.23em}\\raisebox{-.215em}G\\hspace{-.065em}round}
+`;
+
+      function modifyMessage(msg, e) {
+          // \u0332 を用いて強調しているが、フォントの関係からあまりうれしくない。
+          return `${msg} + ${e}`
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/(.)\u0332/g, '<u>$1</u>');
+      }
+
+      function render() {
+          let input = window.document.getElementById('input');
+          let inputText = input.value;
+
+          let output = window.document.getElementById('output');
+          let err = '';
+          output.innerHTML = inputText;
+          renderMathInElement(output, {
+              delimiters:[
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false},
+                  {left: '\\(', right: '\\)', display: false},
+                  {left: '\\[', right: '\\]', display: true}
+              ],
+              errorCallback: ((msg, e) => {
+                  err += `<p>${modifyMessage(msg, e)}</p>\n`;
+              }),
+          });
+
+          if (err !== '') {
+              output.innerHTML += `<div class="error">${err}</div>`;
+          }
+      }
+
+      const CACHE_KEY = 'KaTeXInput';
+      
+      function loadCache() {
+          let input = window.document.getElementById('input');
+          let cache = localStorage.getItem(CACHE_KEY)
+          if (cache !== null) input.value = cache;
+      }
+
+      function storeCache() {
+          let input = window.document.getElementById('input');
+          localStorage.setItem(CACHE_KEY, input.value);
+      }
+
+      window.onload = function() {
+          let input = window.document.getElementById('input');
+          input.addEventListener('input', function() {
+              storeCache();
+          });
+          loadCache();
+          render();
+
+          for (let io of ['input', 'output']) {
+              let ioEl = window.document.getElementById(io);
+              let ioLabel = window.document.getElementById(`${io}-label`);
+              ioEl.addEventListener('focus', function() {
+                  ioLabel.classList.add('focused');
+              });
+              ioEl.addEventListener('focusout', function() {
+                  ioLabel.classList.remove('focused');
+              });
+          }
+
+          {
+              let el = window.document.getElementById('output-label');
+              renderMathInElement(el);
+          }
+          {
+              let el = window.document.getElementById('title');
+              el.innerHTML = katex.renderToString(LOGO)
+          }
+          input.focus();
+      }
+    </script>
+
+    <style>
+      body {
+          font-family: Lato;
+      }
+      button {
+          font-family: Lato;
+          color: #5f6368;
+          background-color: white;
+          border-radius: 4px;
+          border: 1px solid #dadce0;
+      }
+      button:focus {
+          color: white;
+          background-color: #ffadba;
+          border-radius: 4px;
+          border: 1px solid #ffadba;
+          font-weight: bold;
+          outline: 2px solid rgba(255, 173, 186, 0.7);
+      }
+      .error {
+          font-family: monospace;
+          color: #a11
+      }
+      .frame-wrapper {
+          position: relative;
+      }
+      .frame-wrapper .text-label {
+          background-color: white;
+          box-shadow: 5px 0 0 white,-5px 0 0 white;
+          color: #5f6368;
+          display: inline;
+          font-size: 12px;
+          left: 12px;
+          margin-bottom: 0;
+          max-width: 300px;
+          padding: 0;
+          position: absolute;
+          top: 0px;
+          word-wrap: break-word;
+      }
+      .frame-wrapper .div-label {
+          background-color: white;
+          box-shadow: 5px 0 0 white,-5px 0 0 white;
+          color: #5f6368;
+          display: inline;
+          font-size: 12px;
+          left: 12px;
+          margin-bottom: 0;
+          max-width: 300px;
+          padding: 0;
+          position: absolute;
+          top: -8px;
+          word-wrap: break-word;
+      }
+      .frame-wrapper .text-label.focused, .frame-wrapper .div-label.focused {
+          color: #ffadba;
+      }
+      .frame-wrapper .textinput {
+          border: 1px solid #dadce0;
+          border-radius: 4px;
+          box-sizing: border-box;
+          color: #3c4043;
+          font-size: 14px;
+          margin: 8px 0;
+      }
+      .frame-wrapper input.textinput {
+          padding: 1px 8px;
+          height: 36px;
+      }
+      .frame-wrapper textarea.textinput {
+          padding: 8px;
+          min-height: 36px;
+          width: 100%;
+      }
+      .frame-wrapper div.textinput {
+          padding: 8px;
+          min-height: 30px;
+      }
+      .frame-wrapper .textinput:focus {
+          border: 1px solid #ffadba;
+          outline: 1px solid rgba(255, 173, 186, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">KaTeX PlaYground</h1>
+    <div class="frame-wrapper">
+      <label id="input-label" class="text-label" for="input">input</label>
+      <textarea class="textinput" id="input" rows="16" oninput="render();"></textarea>
+    </div>
+    <!-- <div style="margin: 0 0 16px 0;"> -->
+    <!--   <button id="render" onclick="render();">render</button> -->
+    <!-- </div> -->
+    <div class="frame-wrapper">
+      <label id="output-label" class="div-label">\(\KaTeX\)'ed output</label>
+      <div id="output" class="textinput" tabindex="0"></div>
+    </div>
+  </body>
+  <!--
+      https://katex.org/docs/browser.html
+      https://katex.org/docs/node.html
+    -->
+</html>
